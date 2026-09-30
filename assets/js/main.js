@@ -21,9 +21,12 @@
   const nav = $('#nav');
   let ticking = false;
 
+  let heroEnd = 0;
   function measure() {
     const vh = window.innerHeight;
     measureGallery();
+    const heroEl = $('.hero');
+    heroEnd = heroEl ? heroEl.offsetTop + heroEl.offsetHeight - vh : vh * 0.6;
     driven.forEach((d) => {
       const r = d.el.getBoundingClientRect();
       d.top = r.top + window.scrollY;
@@ -44,7 +47,14 @@
         d.el.style.setProperty('--p', clamp01(p).toFixed(4));
       });
     }
-    if (nav) nav.classList.toggle('is-solid', y > vh * 0.6);
+    if (nav) {
+      // Transparent for the whole pinned hero; fade in over the next 40% of a
+      // viewport, i.e. as the hero actually scrolls away.
+      const start = heroEnd;
+      const a = clamp01((y - start) / (vh * 0.4));
+      nav.style.setProperty('--nav-a', a.toFixed(3));
+      doc.style.setProperty('--nav-h', nav.offsetHeight + 'px');
+    }
   }
 
   function onScroll() {
